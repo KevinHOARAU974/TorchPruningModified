@@ -133,6 +133,10 @@ def main(args):
             pretrained = pretrained['state_dict']
         pretrained = {k.replace('module.', '').replace('model.', ''): v for k, v in pretrained.items()}
         model.load_state_dict(pretrained, strict=False)
+        
+    input_size = [3, 224, 224]
+    example_inputs = torch.randn(1, *input_size).to(device)
+    base_macs, base_params = tp.utils.count_ops_and_params(model, example_inputs)
 
     print("Pruning %s..."%args.model_name)
     tp.utils.print_tool.before_pruning(model)
