@@ -135,7 +135,7 @@ def main(args):
         model.load_state_dict(pretrained, strict=False)
     
     model.to(device)
-    model.eval()
+    # model.eval()
         
     input_size = [3, 224, 224]
     example_inputs = torch.randn(1, *input_size).to(device)
