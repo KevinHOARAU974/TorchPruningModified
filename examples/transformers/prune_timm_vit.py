@@ -98,7 +98,7 @@ def validate_model(model, val_loader, device):
             correct += (predicted == labels).sum().item()
     return correct / len(val_loader.dataset), loss / len(val_loader.dataset)
 
-def main(args):
+def apply_pruning(model, args):
     # args = parse_args()
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     example_inputs = torch.randn(1,3,224,224)
@@ -124,17 +124,18 @@ def main(args):
     # example_inputs = torch.randn(1, *input_size).to(device)
     # base_macs, base_params = tp.utils.count_ops_and_params(model, example_inputs)
     
-    if args.model_name == "vit_base_patch16_224":
-        model = timm.create_model(args.model_name, pretrained=True, num_classes=args.num_classes)
-        pretrained = torch.load(args.model_path, map_location='cpu')
-        if 'model' in pretrained:
-            pretrained = pretrained['model']
-        elif 'state_dict' in pretrained:
-            pretrained = pretrained['state_dict']
-        pretrained = {k.replace('module.', '').replace('model.', ''): v for k, v in pretrained.items()}
-        model.load_state_dict(pretrained, strict=False)
+    # if args.model_name == "vit_base_patch16_224":
+    #     model = timm.create_model(args.model_name, pretrained=True, num_classes=args.num_classes)
+    #     pretrained = torch.load(args.model_path, map_location='cpu')
+    #     if 'model' in pretrained:
+    #         pretrained = pretrained['model']
+    #     elif 'state_dict' in pretrained:
+    #         pretrained = pretrained['state_dict']
+    #     pretrained = {k.replace('module.', '').replace('model.', ''): v for k, v in pretrained.items()}
+    #     model.load_state_dict(pretrained, strict=False)
     
     model.to(device)
+    model.train()
     # model.eval()
         
     input_size = [3, 224, 224]
@@ -208,6 +209,8 @@ def main(args):
             head_id+=1
 
     tp.utils.print_tool.after_pruning(model, do_print=True)
+    
+    model.eval()
     if args.test_accuracy:
         print("Testing accuracy of the pruned model...")
         acc_pruned, loss_pruned = validate_model(model, val_loader, device)
@@ -230,6 +233,8 @@ def main(args):
         os.makedirs(os.path.dirname(args.save_as), exist_ok=True)
         model.zero_grad()
         torch.save(model, args.save_as)
+    
+    return model
 
-if __name__=='__main__':
-    main()
+# if __name__=='__main__':
+#     main()
