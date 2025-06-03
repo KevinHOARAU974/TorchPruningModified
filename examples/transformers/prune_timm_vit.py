@@ -118,27 +118,12 @@ def apply_pruning(model, args):
     if args.pruning_type in ['taylor', 'hessian'] or args.test_accuracy:
         train_loader, val_loader = prepare_imagenet(args.data_path, train_batch_size=args.train_batch_size, val_batch_size=args.val_batch_size, use_imagenet_mean_std=args.use_imagenet_mean_std)
 
-    # Load the model
-    # model = timm.create_model(args.model_name, pretrained=True).eval().to(device)
-    # input_size = [3, 224, 224]
-    # example_inputs = torch.randn(1, *input_size).to(device)
-    # base_macs, base_params = tp.utils.count_ops_and_params(model, example_inputs)
-    
-    # if args.model_name == "vit_base_patch16_224":
-    #     model = timm.create_model(args.model_name, pretrained=True, num_classes=args.num_classes)
-    #     pretrained = torch.load(args.model_path, map_location='cpu')
-    #     if 'model' in pretrained:
-    #         pretrained = pretrained['model']
-    #     elif 'state_dict' in pretrained:
-    #         pretrained = pretrained['state_dict']
-    #     pretrained = {k.replace('module.', '').replace('model.', ''): v for k, v in pretrained.items()}
-    #     model.load_state_dict(pretrained, strict=False)
     
     model.to(device)
     model.train()
     # model.eval()
         
-    input_size = [3, 224, 224]
+    input_size = [3, args.img_sz, args.img_sz]
     example_inputs = torch.randn(1, *input_size).to(device)
     base_macs, base_params = tp.utils.count_ops_and_params(model, example_inputs)
 
@@ -168,7 +153,7 @@ def apply_pruning(model, args):
         num_heads=num_heads, # number of heads in self attention
         prune_num_heads=args.prune_num_heads, # reduce num_heads by pruning entire heads (default: False)
         prune_head_dims=not args.prune_num_heads, # reduce head_dim by pruning featrues dims of each head (default: True)
-        head_pruning_ratio=0.5, #args.head_pruning_ratio, # remove 50% heads, only works when prune_num_heads=True (default: 0.0)
+        head_pruning_ratio= args.head_pruning_ratio, # remove 50% heads, only works when prune_num_heads=True (default: 0.0)
         round_to=1
     )
 
