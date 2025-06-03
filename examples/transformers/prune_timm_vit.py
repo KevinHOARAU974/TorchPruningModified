@@ -124,7 +124,7 @@ def main(args):
     # example_inputs = torch.randn(1, *input_size).to(device)
     # base_macs, base_params = tp.utils.count_ops_and_params(model, example_inputs)
     
-    if args.model_name == "vit-b-16":
+    if args.model_name == "vit_base_patch16_224":
         model = timm.create_model(args.model_name, pretrained=True, num_classes=args.num_classes)
         pretrained = torch.load(args.model_path, map_location='cpu')
         if 'model' in pretrained:
