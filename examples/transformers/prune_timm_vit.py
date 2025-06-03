@@ -133,6 +133,9 @@ def main(args):
             pretrained = pretrained['state_dict']
         pretrained = {k.replace('module.', '').replace('model.', ''): v for k, v in pretrained.items()}
         model.load_state_dict(pretrained, strict=False)
+    
+    model.to(device)
+    model.eval()
         
     input_size = [3, 224, 224]
     example_inputs = torch.randn(1, *input_size).to(device)
