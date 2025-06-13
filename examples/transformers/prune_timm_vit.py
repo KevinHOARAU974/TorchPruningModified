@@ -212,6 +212,12 @@ def apply_pruning(model, args):
 
     latency_mean, latency_std = tp.utils.benchmark.measure_latency(model, example_inputs=torch.randn(16,3,224,224).to(device), repeat=300)
     print("Latency: %.4f ms, Std: %.4f ms"%(latency_mean, latency_std))
+    
+    result_dict = {"macs" : pruned_macs,
+                   "params" : pruned_params,
+                   "loss" : loss_pruned,
+                   "accuracy" : acc_pruned
+                   }
 
     if args.save_as is not None:
         print("Saving the pruned model to %s..."%args.save_as)
@@ -219,7 +225,7 @@ def apply_pruning(model, args):
         model.zero_grad()
         torch.save(model, args.save_as)
     
-    return model
+    return result_dict
 
 # if __name__=='__main__':
 #     main()
